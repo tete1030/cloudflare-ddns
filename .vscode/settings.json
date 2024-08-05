@@ -5,14 +5,7 @@
     "**/.hg": true,
     "**/CVS": true,
     "**/.DS_Store": true,
-    "**/Thumbs.db": true,
-    ".github": true,
-    ".gitignore": true,
-    ".vscode": true,
-    "Dockerfile": true,
-    "LICENSE": true,
-    "requirements.txt": true,
-    "venv": true
+    "**/Thumbs.db": true
   },
   "explorerExclude.backup": {},
   "python.linting.pylintEnabled": true,

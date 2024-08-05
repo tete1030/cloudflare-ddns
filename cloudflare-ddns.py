@@ -15,6 +15,7 @@ import sys
 import threading
 import time
 import requests
+import re
 
 CONFIG_PATH = os.environ.get('CONFIG_PATH', os.getcwd())
 
@@ -77,9 +78,22 @@ def getIPs():
                 global shown_ipv4_warning_secondary
                 if not shown_ipv4_warning_secondary:
                     shown_ipv4_warning_secondary = True
-                    print("🧩 IPv4 not detected via 1.0.0.1. Verify your ISP or DNS provider isn't blocking Cloudflare's IPs.")
-                if purgeUnknownRecords:
-                    deleteEntries("A")
+                    print("🧩 IPv4 not detected via 1.1.1.1, 1.0.0.1, try myip.ipip.net")
+                try:
+                    a = requests.get(
+                        "https://myip.ipip.net").text
+                    match = re.search(r'\d+\.\d+\.\d+\.\d+', a)
+                    if match:
+                        a = match.group()
+                    else:
+                        raise Exception("🧩 Unable to detect IPv4 via myip.ipip.net")
+                except Exception:
+                    global shown_ipv4_warning_tertiary
+                    if not shown_ipv4_warning_tertiary:
+                        shown_ipv4_warning_tertiary = True
+                        print("🧩 IPv4 not detected via myip.ipip.net. Verify your ISP or DNS provider isn't blocking Cloudflare's IPs.")
+                    if purgeUnknownRecords:
+                        deleteEntries("A")
     if ipv6_enabled:
         try:
             aaaa = requests.get(
@@ -248,6 +262,7 @@ def updateIPs(ips):
 if __name__ == '__main__':
     shown_ipv4_warning = False
     shown_ipv4_warning_secondary = False
+    shown_ipv4_warning_tertiary = False
     shown_ipv6_warning = False
     shown_ipv6_warning_secondary = False
     ipv4_enabled = True
@@ -256,6 +271,10 @@ if __name__ == '__main__':
 
     if sys.version_info < (3, 5):
         raise Exception("🐍 This script requires Python 3.5+")
+
+    if sys.argv[1] == "--get-ips":
+        print(getIPs())
+        sys.exit(0)
 
     config = None
     try:
